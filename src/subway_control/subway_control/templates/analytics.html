@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>구급활동일지 및 분석</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { background-color: #e9ecef; font-family: 'Noto Sans KR', sans-serif; }
+        .report-paper { background: white; width: 210mm; min-height: 297mm; margin: 30px auto; padding: 40px; box-shadow: 0 0 20px rgba(0,0,0,0.1); border: 1px solid #d3d3d3; }
+        .report-header { text-align: center; border-bottom: 3px double #333; padding-bottom: 15px; margin-bottom: 25px; }
+        .report-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .report-table th, .report-table td { border: 1px solid #444; padding: 8px 12px; vertical-align: middle; font-size: 0.9rem; }
+        .report-table th { background-color: #f8f9fa; width: 140px; text-align: center; font-weight: 700; color: #333; }
+        .section-title { font-size: 1.1rem; font-weight: 800; margin-top: 25px; margin-bottom: 10px; border-left: 5px solid #2c3e50; padding-left: 10px; text-transform: uppercase; }
+        .input-clean { width: 100%; border: 1px dashed #ccc; padding: 5px; font-family: inherit; font-weight: 500; background: #fdfdfd; }
+        .input-clean:focus { border: 1px solid #0056b3; outline: none; background: #fff; }
+        .gender-group label { cursor: pointer; padding: 4px 10px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; font-size: 0.85rem; }
+        .gender-group input[type="radio"] { display: none; }
+        .gender-group input[type="radio"]:checked + label { background-color: #495057; color: white; }
+        .timestamp-val { font-family: 'Consolas', monospace; color: #0056b3; font-weight: bold; }
+        .status-badge { font-weight: bold; font-size: 0.85rem; }
+        .status-pending { color: #adb5bd; }
+        .status-done { color: #198754; }
+        .notes-area { width: 100%; min-height: 200px; border: 1px solid #444; padding: 15px; font-size: 0.95rem; line-height: 1.6; background-color: #fff; white-space: pre-wrap; outline: none; }
+        
+        @media print {
+            @page { margin: 15mm; size: A4; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+            .container { display: none !important; } 
+            .report-paper { box-shadow: none; border: none; margin: 0; width: 100%; }
+            .input-clean { border: none; padding: 0; }
+            .gender-group input[type="radio"]:checked + label { background: none; color: black; font-weight: bold; text-decoration: underline; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container text-center mt-4 no-print">
+    <a href="/dashboard" class="btn btn-secondary me-2">📺 실시간 관제</a>
+    <a href="/history" class="btn btn-outline-secondary me-2">📋 이력 목록</a>
+    <button class="btn btn-primary" onclick="window.print()">🖨️ 리포트 출력</button>
+</div>
+
+<div class="report-paper">
+    <div class="report-header">
+        <h1 style="font-weight: 900; letter-spacing: -1px; font-size: 2rem;">구급 활동 및 분석 보고서</h1>
+        <p style="margin-top: 5px; font-size: 0.9rem; color: #555;">문서번호: ROKEY-2025-EMR-001 &nbsp;|&nbsp; 관제소: 지하철 안전 통합 센터</p>
+    </div>
+
+    <div class="section-title">1. 환자 인적사항 (Patient Information)</div>
+    <table class="report-table">
+        <tr>
+            <th>성 명 (Name)</th>
+            <td><input type="text" id="input-name" class="input-clean"></td>
+            <th>성 별 (Gender)</th>
+            <td>
+                <div class="gender-group">
+                    <input type="radio" name="gender" id="male" value="M"><label for="male">남성</label>
+                    <input type="radio" name="gender" id="female" value="F"><label for="female">여성</label>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <th>연 령 (Age)</th>
+            <td><input type="text" id="input-age" class="input-clean"></td>
+            <th>발생 장소</th>
+            <td><input type="text" id="input-location" class="input-clean"></td>
+        </tr>
+        <tr>
+            <th>환자 상태</th>
+            <td colspan="3"><input type="text" id="input-status" class="input-clean text-danger" style="font-weight: 700;"></td>
+        </tr>
+    </table>
+
+    <div class="section-title">2. 대응 타임라인 (Response Timeline)</div>
+    <table class="report-table">
+        <thead>
+            <tr style="background:#f8f9fa;">
+                <th style="width:20%">구 분</th>
+                <th style="width:25%">진행 상태</th>
+                <th>발생 시각 (Time Log)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><th>상황 접수</th><td id="s-1" class="status-badge status-pending">대기</td><td id="t-1" class="timestamp-val">-</td></tr>
+            <tr><th>초동 조치</th><td id="s-2" class="status-badge status-pending">대기</td><td id="t-2" class="timestamp-val">-</td></tr>
+            <tr><th>환자 통제</th><td id="s-3" class="status-badge status-pending">대기</td><td id="t-3" class="timestamp-val">-</td></tr>
+            <tr><th>구급대 인계</th><td id="s-4" class="status-badge status-pending">대기</td><td id="t-4" class="timestamp-val">-</td></tr>
+            <tr><th>상황 종료</th><td id="s-5" class="status-badge status-pending">대기</td><td id="t-5" class="timestamp-val">-</td></tr>
+        </tbody>
+    </table>
+
+    <div class="section-title">3. 조치 및 특이사항 (Actions & Remarks)</div>
+    <div id="input-remarks" class="notes-area" contenteditable="true"></div>
+
+    <div class="mt-5 text-end">
+        <p>작성일시: <span id="print-date"></span></p>
+        <h5 style="margin-top: 20px; font-weight: 900;">지하철 안전 통합 관제센터장 (인)</h5>
+    </div>
+</div>
+
+<script>
+    const now = new Date();
+    document.getElementById('print-date').innerText = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,'0') + "-" + String(now.getDate()).padStart(2,'0');
+
+    loadData();
+
+    function loadData() {
+        fetch('/api/analytics/data' + window.location.search)
+            .then(res => res.json())
+            .then(data => {
+                updateTimeline(data.logs);
+                
+                if (data.patient) {
+                    const p = data.patient;
+                    document.getElementById('input-name').value = p.name || "신원 미상 (Unidentified)";
+                    document.getElementById('input-age').value = p.age || "미상 (Unknown)";
+                    document.getElementById('input-location').value = p.location || "현장 위치 확인 필요";
+                    document.getElementById('input-status').value = p.status || "초기 상태 평가 대기";
+                    document.getElementById('input-remarks').innerText = p.remarks || "특이사항 없음.";
+                    if (p.gender === 'M') document.getElementById('male').checked = true;
+                    if (p.gender === 'F') document.getElementById('female').checked = true;
+                }
+            });
+    }
+
+    // [수정된 핵심 함수] 불필요한 필터링 제거하고 모든 로그 스캔
+    function updateTimeline(logs) {
+        if (!logs || logs.length === 0) return;
+
+        // 시간 오름차순 (과거 -> 현재) 정렬
+        let sortedLogs = [...logs].sort((a, b) => a[2].localeCompare(b[2])); 
+
+        // 키워드 정의 (sysmon.html과 동일하게 폭넓게 설정)
+        const steps = [
+            { id: 1, key: ["대기", "접수", "알림", "호출", "시작", "수신"], label: "접수 완료" },
+            { id: 2, key: ["AED", "출동", "이동", "환자", "가는 중"], label: "출동 완료" },
+            { id: 3, key: ["통제", "발견", "안내", "안전", "도착"], label: "통제 실시" },
+            { id: 4, key: ["구급대", "인계", "119"], label: "인계 완료" },
+            { id: 5, key: ["복귀", "종료", "도킹"], label: "상황 종료" }
+        ];
+
+        steps.forEach(step => {
+            const timeCell = document.getElementById(`t-${step.id}`);
+            const statusCell = document.getElementById(`s-${step.id}`);
+            
+            // 해당 단계의 키워드가 포함된 로그 중 '가장 마지막(최신)' 로그를 찾음
+            let foundLog = null;
+            for(let log of sortedLogs) {
+                let msg = log[1]; 
+                if (step.key.some(k => msg.includes(k))) {
+                    foundLog = log;
+                    // 여기서 break하지 않고 계속 돌리면 가장 마지막(최신) 시간을 잡습니다.
+                    // 타임라인은 해당 단계가 '완료'된 시점을 찍으므로 첫 발견이 맞을 수 있습니다.
+                    break; 
+                }
+            }
+
+            if (foundLog) {
+                let timeStr = foundLog[2].split('.')[0]; // 밀리초 제거
+                timeCell.innerText = timeStr;
+                statusCell.innerText = step.label; 
+                statusCell.className = "status-badge status-done"; 
+                statusCell.style.color = "#198754";
+            }
+        });
+    }
+
+    function savePatientData() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const reportId = urlParams.get('id');
+        const payload = {
+            id: reportId,
+            name: document.getElementById('input-name').value,
+            gender: document.querySelector('input[name="gender"]:checked')?.value,
+            age: document.getElementById('input-age').value,
+            location: document.getElementById('input-location').value,
+            status: document.getElementById('input-status').value,
+            remarks: document.getElementById('input-remarks').innerText
+        };
+        fetch('/api/analytics/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+    }
+
+    document.querySelectorAll('.input-clean, .notes-area').forEach(el => el.addEventListener('blur', savePatientData));
+    document.querySelectorAll('input[name="gender"]').forEach(el => el.addEventListener('change', savePatientData));
+</script>
+
+</body>
+</html>

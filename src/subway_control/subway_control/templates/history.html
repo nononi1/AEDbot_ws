@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>안전 운행 이력 센터</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* === 기본 다크 테마 === */
+        body { 
+            background-color: #000000; 
+            color: #cccccc; 
+            font-family: 'Noto Sans KR', sans-serif; 
+            margin: 0;
+        }
+        
+        /* === 상단 헤더 === */
+        .header-bar { 
+            background-color: #111; 
+            border-bottom: 1px solid #333; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .page-title { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            color: #fff; 
+            margin: 0; 
+        }
+        
+        /* === 레이아웃 컨테이너 === */
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* === 통계 카드 (KPI) === */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            padding: 25px; 
+            text-align: center; 
+            transition: transform 0.2s, border-color 0.2s; 
+        }
+        .stat-card:hover { 
+            transform: translateY(-5px); 
+            border-color: #555; 
+        }
+        .stat-value { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            color: #fff; 
+            margin: 10px 0; 
+        }
+        .stat-label { 
+            color: #888; 
+            font-size: 0.9rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-weight: 500;
+        }
+        
+        /* 텍스트 컬러 유틸리티 */
+        .text-orange { color: #ff9800 !important; } 
+        .text-green { color: #00e676 !important; } 
+        .text-blue { color: #2979ff !important; } 
+        .text-red { color: #ff5252 !important; }
+
+        /* === 섹션 제목 === */
+        .section-header {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            border-left: 5px solid #2979ff;
+            padding-left: 15px;
+            font-weight: 700;
+        }
+
+        /* === 테이블 스타일 === */
+        .history-card { 
+            background: #1a1a1a; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            overflow: hidden; 
+        }
+        .history-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.95rem;
+        }
+        .history-table th { 
+            background: #222; 
+            color: #fff; 
+            padding: 18px 20px; 
+            border-bottom: 2px solid #444; 
+            text-align: left; 
+            font-weight: 600; 
+        }
+        .history-table td { 
+            padding: 18px 20px; 
+            border-bottom: 1px solid #333; 
+            color: #ddd; 
+            vertical-align: middle; 
+        }
+        .history-table tr:hover { 
+            background-color: #2a2a2a; 
+        }
+        .history-table tr:last-child td { 
+            border-bottom: none; 
+        }
+
+        /* 상태 배지 */
+        .status-badge { 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            font-weight: bold; 
+            background: rgba(0, 230, 118, 0.1); 
+            color: #00e676; 
+            border: 1px solid #00e676; 
+        }
+        
+        /* 버튼 스타일 */
+        .btn-view { 
+            background: #2979ff; 
+            color: white; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            text-decoration: none; 
+            font-size: 0.9rem; 
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .btn-view:hover { 
+            background: #2962ff; 
+            color: white;
+        }
+        
+        .btn-back { 
+            border: 1px solid #555; 
+            color: #ccc; 
+            background: #222; 
+            padding: 8px 20px; 
+            text-decoration: none; 
+            border-radius: 4px; 
+            font-size: 0.9rem;
+            transition: background 0.3s; 
+        }
+        .btn-back:hover { 
+            background: #333; 
+            color: white; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-bar">
+    <div class="d-flex align-items-center gap-3">
+        <div class="page-title">📊 안전 운행 이력 센터 (History Center)</div>
+    </div>
+    <div>
+        <span style="margin-right: 20px; color: #777;">
+            SYSTEM OPERATOR: <b style="color: #fff;">{{ username }}</b>
+        </span>
+        <a href="/dashboard" class="btn-back">⬅ 실시간 관제 복귀</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="kpi-grid">
+        <div class="stat-card">
+            <div class="stat-label">총 누적 발생 건수</div>
+            <div class="stat-value text-red" id="val-total">0</div>
+            <span style="color: #666; font-size: 0.85rem;">Cases (Total)</span>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">현재 무사고 운행</div>
+            <div class="stat-value text-green" id="val-safe">0</div>
+            <span style="color: #666; font-size: 0.85rem;">Days (Accident Free)</span>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">금일 로봇 제어 횟수</div>
+            <div class="stat-value text-orange" id="val-cmds">0</div>
+            <span style="color: #666; font-size: 0.85rem;">Commands (Today)</span>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-label">평균 조치 소요 시간</div>
+            <div class="stat-value text-blue" id="val-time">00:00</div>
+            <span style="color: #666; font-size: 0.85rem;">min:sec (Avg Duration)</span>
+        </div>
+    </div>
+
+    <div class="section-header">
+        🚨 응급 상황 조치 이력 (Emergency Logs)
+    </div>
+    
+    <div class="history-card">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th width="8%">ID</th>
+                    <th width="20%">발생 시각 (Date/Time)</th>
+                    <th>주요 상황 (Event Summary)</th>
+                    <th width="12%">결과 (Result)</th>
+                    <th width="12%">상세 보고서</th>
+                </tr>
+            </thead>
+            <tbody id="history-list">
+                <tr><td colspan="5" style="text-align: center; padding: 40px; color: #666;">데이터 로딩 중...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // 서버 API 호출하여 통계 및 이력 데이터 가져오기
+    fetch('/api/history/list')
+        .then(res => res.json())
+        .then(data => {
+            // 1. 상단 통계 카드 업데이트
+            document.getElementById('val-total').innerText = data.stats.total_cases;
+            document.getElementById('val-safe').innerText = data.stats.safe_days;
+            
+            // [업데이트] 누적이 아닌 '금일' 카운트 적용
+            document.getElementById('val-cmds').innerText = data.stats.total_cmds;
+            document.getElementById('val-time').innerText = data.stats.avg_time;
+
+            // 2. 하단 이력 테이블 업데이트
+            const list = document.getElementById('history-list');
+            
+            if (data.history.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: #666;">기록된 응급 상황이 없습니다. (시스템 정상 가동 중)</td></tr>';
+                return;
+            }
+
+            let html = '';
+            data.history.forEach((item) => {
+                // 내용이 너무 길면 잘라서 보여주기 (...)
+                let summary = item.content;
+                if(summary.length > 50) summary = summary.substring(0, 50) + "...";
+                
+                // 날짜 포맷 정리 (초 단위까지만)
+                let timeDisplay = item.timestamp.split('.')[0];
+
+                html += `
+                    <tr>
+                        <td style="color:#777;">#${item.id}</td>
+                        <td style="color: #2979ff; font-family: monospace; font-size: 1rem;">${timeDisplay}</td>
+                        <td>${summary}</td>
+                        <td><span class="status-badge">조치 완료</span></td>
+                        <td>
+                            <a href="/analytics?id=${item.id}" class="btn-view">📄 열기</a>
+                        </td>
+                    </tr>
+                `;
+            });
+            list.innerHTML = html;
+        });
+</script>
+
+</body>
+</html>

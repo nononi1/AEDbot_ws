@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>지하철 안전 관제 - 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* === 전체 배경 (다크 모드) === */
+        body { 
+            background-color: #1a1a1a; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: 'Noto Sans KR', sans-serif; 
+        }
+        
+        /* === 로그인 박스 === */
+        .login-box { 
+            background: #2b2b2b; 
+            padding: 40px; 
+            border-radius: 8px; 
+            text-align: center; 
+            width: 320px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); 
+            border: 1px solid #444; 
+        }
+        
+        /* === 제목 스타일 (오렌지 포인트) === */
+        h1 { 
+            margin-bottom: 30px; 
+            color: #ff9800; 
+            font-size: 22px; 
+            font-weight: 700; 
+            letter-spacing: -0.5px; 
+            text-transform: uppercase;
+        }
+        
+        /* === 입력창 커스텀 === */
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 15px; 
+            background: #333; 
+            border: 1px solid #555; 
+            color: white; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
+            outline: none; 
+            transition: border-color 0.3s; 
+        }
+        input:focus { 
+            border-color: #ff9800; 
+            background-color: #404040; 
+        }
+        
+        /* === 로그인 버튼 === */
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: #ff9800; 
+            border: none; 
+            color: white; 
+            font-weight: bold; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 15px; 
+            margin-top: 10px; 
+            transition: background 0.3s; 
+        }
+        button:hover { background: #f57c00; }
+        
+        /* === 하단 링크 === */
+        .links { margin-top: 20px; font-size: 13px; }
+        .links a { color: #888; text-decoration: none; transition: color 0.3s; }
+        .links a:hover { color: #ff9800; text-decoration: underline; }
+        
+        /* === 에러 메시지 (로그인 실패 시) === */
+        .flash-msg { 
+            color: #ff6b6b; 
+            margin-bottom: 20px; 
+            font-size: 13px; 
+            background: rgba(220, 53, 69, 0.1); 
+            padding: 10px; 
+            border-radius: 4px; 
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h1>Safety Control Login</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-msg">{{ messages[0] }}</div>
+            {% endif %}
+        {% endwith %}
+
+        <form action="/login" method="POST">
+            <input type="text" name="username" placeholder="아이디 (Username)" required autocomplete="off">
+            <input type="password" name="password" placeholder="비밀번호 (Password)" required>
+            <button type="submit">로그인 (LOGIN)</button>
+        </form>
+        
+        <div class="links">
+            <a href="/signup">관리자 계정 등록 (Sign Up)</a>
+        </div>
+    </div>
+</body>
+</html>
